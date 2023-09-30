@@ -686,7 +686,7 @@ def BuildPath(origin, dir, l):
     return radiance
 
 @ti.func
-def Scene(x, y, origin, delta_origin, theta, dof, lens_roughness, lens_index):
+def Scene(x, y, origin, theta, dof, lens_roughness, lens_index):
     """Color Calculation Of The Pixel Of The Whole Scene"""
     u = (2 * (x / image_width) - 1) * aspect_ratio * tan_fov
     v = (2 * (y / image_height) - 1) * tan_fov
@@ -703,11 +703,7 @@ def Scene(x, y, origin, delta_origin, theta, dof, lens_roughness, lens_index):
     ray_direction = tm.normalize(tm.vec3(m1 @ m2))
     # Lens Roughness
     ray_direction = tm.mix(ray_direction, RandomCosineDirectionHemisphere(ray_direction), lens_roughness)
-    #origin += delta_origin[0] * forward + delta_origin[1] * up + delta_origin[2] * left
     color = tm.vec3(0, 0, 0)
-    #color += Analytical(origin, ray_direction)[1]
-    #color += RayMarch(origin, ray_direction, t)[0]
-    #color += Hybrid(origin, ray_direction, t)[0]
     l = SampleSpectral(380.0, 720.0, ti.random())
     l_new = l
     step_paths_num = step_paths
@@ -748,11 +744,12 @@ def CalculateOrigin(origin, delta_origin, theta):
 @ti.kernel
 def Kernel(s:ti.uint32, origin:tm.vec3, delta_origin:tm.vec3, theta:tm.vec2, t:ti.f32, world:ti.template()) -> tm.vec3:
     dof, lens_roughness, lens_index = world.Camera(t)[2:5]
+    new_origin = CalculateOrigin(origin, delta_origin, theta)
     for x, y in pixels:
-        pixels[x, y] += tm.max(Scene(x, y, origin, delta_origin, theta, dof, lens_roughness, lens_index), 0.0)
+        pixels[x, y] += tm.max(Scene(x, y, new_origin, theta, dof, lens_roughness, lens_index), 0.0)
     for x, y in imagepixels:
         imagepixels[x, y] = Gamma(BioPhotometricTonemap(tm.max(spectrum.XYZToRGB(pixels[x, y] / s), 0.0)), 2.2)
-    return CalculateOrigin(origin, delta_origin, theta)
+    return new_origin
 
 
 # Python Environment
@@ -938,12 +935,12 @@ else:
         frame_end = time.perf_counter()
         fps = 1 / (frame_end - frame_start)
         frame_start = frame_end
-        #print('\033[1A\033[K', end='')
-        #print('\033[1A\033[K', end='')
-        #print('\033[1A\033[K', end='')
-        #print('\033[1A\033[K', end='')
-        #print(f'Samples: {s * step_paths}')
-        #print(f'Camera Position: {tm.vec3(round(origin[0], 3), round(origin[1], 3), round(origin[2], 3))}')
-        #print(f'Camera Angle: {tm.vec2(round(theta[0] * 180.0 / tm.pi, 3), round(theta[1] * 180.0 / tm.pi, 3))}')
-        #print(f'Time: {round(t, 3)}')
+        print('\033[1A\033[K', end='')
+        print('\033[1A\033[K', end='')
+        print('\033[1A\033[K', end='')
+        print('\033[1A\033[K', end='')
+        print(f'Samples: {s * step_paths}')
+        print(f'Camera Position: {tm.vec3(round(origin[0], 3), round(origin[1], 3), round(origin[2], 3))}')
+        print(f'Camera Angle: {tm.vec2(round(theta[0] * 180.0 / tm.pi, 3), round(theta[1] * 180.0 / tm.pi, 3))}')
+        print(f'Time: {round(t, 3)}')
 
