@@ -3,5 +3,4 @@
 /Animations
 
 # Python Cache
-*/__pycache__
-
+*.pyc

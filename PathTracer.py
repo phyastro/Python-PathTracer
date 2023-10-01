@@ -844,7 +844,7 @@ if Renderimage == True:
         print(f"The animation rendering has been completed in {round(time_taken, 4)} seconds with {num_paths} paths and path length {path_length} for each frame.")
     else:
         if ui == True:
-            gui = ti.GUI("Path Tracing", res=(image_width, image_height), fast_gui=True)
+            gui = ti.GUI("Path Tracer", res=(image_width, image_height), fast_gui=True)
         t = time_s
         worldspec = importlib.util.spec_from_file_location("world", worldfilepath.name)
         world = importlib.util.module_from_spec(worldspec)
