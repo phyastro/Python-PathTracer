@@ -1,6 +1,6 @@
 ﻿
 # Avoid Uploading Animations
-/Renders/Animations
+/Animations
 
 # Python Cache
 */__pycache__
