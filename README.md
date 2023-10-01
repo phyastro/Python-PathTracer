@@ -1,2 +1,2 @@
-# Path_Tracing
- Path Tracer Written In Python
+# Python Path Tracer
+ Spectral Path Tracer Written In Python
