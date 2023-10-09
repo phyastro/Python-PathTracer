@@ -100,8 +100,8 @@ def SpectralPDF(start, end):
     return 1.0 / (end - start)
 
 @ti.func
-def HeroSpectralSampling(l_h, j, l_min, l_max, C):
-    """Hero Wavelength Spectral sampling"""
+def SpectralSamplingTrick(l_h, j, l_min, l_max, C):
+    """Spectrl Sampling Trick To Reduce Temporal Noise"""
     l_d = l_max - l_min
     return tm.mod((l_h - l_min) + ((j / C) * (l_d)), l_d) + l_min
 
@@ -691,7 +691,7 @@ def Scene(x, y, origin, theta, dof, lens_roughness, lens_index):
     u = (2 * (x / image_width) - 1) * aspect_ratio * tan_fov
     v = (2 * (y / image_height) - 1) * tan_fov
     # SSAA
-    anti_alias = ((ti.random() - 0.5) / image_width, (ti.random() - 0.5) / image_height)
+    anti_alias = ((2.0 * ti.random() - 0.5) / image_width, (2.0 * ti.random() - 0.5) / image_height)
     u += anti_alias[0]
     v += anti_alias[1]
     # http://www.songho.ca/opengl/gl_anglestoaxes.html
@@ -713,8 +713,9 @@ def Scene(x, y, origin, theta, dof, lens_roughness, lens_index):
     ti.loop_config(parallelize=10)
     for k in range(step_paths_num):
         if k > 0:
-            # Hero Wavelength Spectral Sampling WIthout MIS :(
-            l_new = HeroSpectralSampling(l, k, 380.0, 720.0, step_paths_num - 1)
+            #l_new = SampleSpectral(380.0, 720.0, ti.random())
+            # Trick To Reduce Temporal Noise
+            l_new = SpectralSamplingTrick(l, k, 380.0, 720.0, step_paths_num - 1)
         # Lens Refraction, Dispersion(Chromatic Abberation)
         ori = origin
         dir = ray_direction
